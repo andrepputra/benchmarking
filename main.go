@@ -1,10 +1,11 @@
 package main
 
 import (
+	crypto_rand "crypto/rand"
+	"encoding/binary"
 	"math/rand"
 	"regexp"
 	"runtime"
-	"time"
 )
 
 const (
@@ -19,15 +20,20 @@ func main() {
 }
 
 func SimulateLootRNG() {
-	rand.Seed(time.Now().UnixNano())
+	var b [8]byte
+	_, err := crypto_rand.Read(b[:])
+	if err != nil {
+		panic("cannot seed math/rand package with cryptographically secure random number generator")
+	}
+	rand.Seed(int64(binary.LittleEndian.Uint64(b[:])))
 
 	nCPU := runtime.NumCPU()
 	rngTests := make([]chan []int, 0, nCPU)
-	for i := range rngTests {
+	for i := 0; i < nCPU; i++ {
 		c := make(chan []int)
 		//divide per CPU thread
 		go simulateRNG(numberOfSimulation/nCPU, c)
-		rngTests[i] = c
+		rngTests = append(rngTests, c)
 	}
 
 	// Concatentate the test results
@@ -69,8 +75,8 @@ func interaction() int {
  */
 func simulation(n int) []int {
 	interactions := make([]int, 0, n)
-	for i := range interactions {
-		interactions[i] = interaction()
+	for i := 0; i < n; i++ {
+		interactions = append(interactions, interaction())
 	}
 	return interactions
 }
@@ -79,10 +85,10 @@ func simulation(n int) []int {
  * Runs several simulations and returns the results
  */
 func simulateRNG(n int, c chan []int) {
-	simulations := make([]int, 0, n)
-	for i := range simulations {
+	simulations := make([]int, n)
+	for i := 0; i < n; i++ {
 		for _, v := range simulation(numberOfInteraction) {
-			simulations[i] += v
+			simulations = append(simulations, simulations[i]+v)
 		}
 	}
 	c <- simulations
@@ -90,8 +96,8 @@ func simulateRNG(n int, c chan []int) {
 
 func StringWithCharset(length int, charset string) string {
 	b := make([]byte, 0, length)
-	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
+	for i := 0; i < length; i++ {
+		b = append(b, charset[rand.Intn(len(charset))])
 	}
 	return string(b)
 }
