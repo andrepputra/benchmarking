@@ -2,8 +2,8 @@ package main
 
 import (
 	"math/rand"
-	"regexp"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -25,12 +25,12 @@ func SimulateLootRNG() {
 	rngTests := make([]chan []int, nCPU)
 	for i := range rngTests {
 		c := make(chan []int)
-		//divide per CPU thread
+		// Divide per CPU thread
 		go simulateRNG(numberOfSimulation/nCPU, c)
 		rngTests[i] = c
 	}
 
-	// Concatentate the test results
+	// Concatenate the test results
 	results := make([]int, numberOfSimulation)
 	for i, c := range rngTests {
 		start := (numberOfSimulation / nCPU) * i
@@ -47,26 +47,20 @@ func SimulateLootRNG() {
 	But if monster name doesn't contain any of character from `victory`, it will be treated as 0
 */
 func interaction() int {
-	rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
+	// rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
 
 	monsterName := String(RandomNumber())
-	nameContainsVictory := rx.MatchString(monsterName)
+	nameContainsVictory := strings.ContainsAny(strings.ToLower(monsterName), "victory")
 	isItemDrop := rand.Float64() <= dropRate
 
-	if !nameContainsVictory {
-		return 0
-	}
-
-	if isItemDrop {
+	if nameContainsVictory && isItemDrop {
 		return 1
 	}
 
 	return 0
 }
 
-/**
- * Runs several interactions and retuns a slice representing the results
- */
+// Runs several interactions and retuns a slice representing the results
 func simulation(n int) []int {
 	interactions := make([]int, n)
 	for i := range interactions {
@@ -75,9 +69,7 @@ func simulation(n int) []int {
 	return interactions
 }
 
-/**
- * Runs several simulations and returns the results
- */
+// Runs several simulations and returns the results
 func simulateRNG(n int, c chan []int) {
 	simulations := make([]int, n)
 	for i := range simulations {
