@@ -1,0 +1,38 @@
+//before
+
+tkpd-ops@202376:~/go/src/github.com/tokopedia/benchmarking$ go test -bench=. -benchtime=5000x
+goos: linux
+goarch: amd64
+pkg: github.com/tokopedia/benchmarking
+BenchmarkSimulateLootRNG-4          5000             13989 ns/op
+PASS
+ok      github.com/tokopedia/benchmarking       0.156s
+
+tkpd-ops@202376:~/go/src/github.com/tokopedia/benchmarking$ go test -bench=. -benchtime=5000x -benchmem
+goos: linux
+goarch: amd64
+pkg: github.com/tokopedia/benchmarking
+BenchmarkSimulateLootRNG-4          5000             13932 ns/op            5960 B/op         30 allocs/op
+PASS
+ok      github.com/tokopedia/benchmarking       0.202s
+
+
+//after
+
+tkpd-ops@202376:~/go/src/github.com/tokopedia/benchmarking$ go test -bench=. -benchtime=5000x
+goos: linux
+goarch: amd64
+pkg: github.com/tokopedia/benchmarking
+BenchmarkSimulateLootRNG-4          5000                98.1 ns/op
+PASS
+ok      github.com/tokopedia/benchmarking       0.023s
+
+tkpd-ops@202376:~/go/src/github.com/tokopedia/benchmarking$ go test -bench=. -benchtime=5000x -benchmem
+goos: linux
+goarch: amd64
+pkg: github.com/tokopedia/benchmarking
+BenchmarkSimulateLootRNG-4          5000                98.8 ns/op            12 B/op          0 allocs/op
+PASS
+ok      github.com/tokopedia/benchmarking       0.023s
+
+
