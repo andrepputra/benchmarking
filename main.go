@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"regexp"
 	"runtime"
+	"sync"
 	"time"
 )
 
@@ -12,6 +13,15 @@ const (
 	numberOfInteraction = 100
 	dropRate            = 0.1
 	charset             = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	charsetLen          = len(charset)
+	min                 = 10
+	max                 = 30
+)
+
+var (
+	rx   = regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
+	once sync.Once
+	nCPU = runtime.NumCPU()
 )
 
 func main() {
@@ -19,14 +29,19 @@ func main() {
 }
 
 func SimulateLootRNG() {
-	rand.Seed(time.Now().UnixNano())
+	once.Do(func() {
+		rand.Seed(time.Now().UnixNano())
+	})
 
-	nCPU := runtime.NumCPU()
+	poolSize := 10
+	sem := make(chan struct{}, poolSize)
+
 	rngTests := make([]chan []int, nCPU)
 	for i := range rngTests {
 		c := make(chan []int)
 		//divide per CPU thread
-		go simulateRNG(numberOfSimulation/nCPU, c)
+		sem <- struct{}{}
+		go simulateRNG(numberOfSimulation/nCPU, c, sem)
 		rngTests[i] = c
 	}
 
@@ -46,9 +61,8 @@ func SimulateLootRNG() {
 	Returns 1 if the monster dropped an item and 0 otherwise
 	But if monster name doesn't contain any of character from `victory`, it will be treated as 0
 */
-func interaction() int {
-	rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
 
+func interaction() int {
 	monsterName := String(RandomNumber())
 	nameContainsVictory := rx.MatchString(monsterName)
 	isItemDrop := rand.Float64() <= dropRate
@@ -78,7 +92,11 @@ func simulation(n int) []int {
 /**
  * Runs several simulations and returns the results
  */
-func simulateRNG(n int, c chan []int) {
+func simulateRNG(n int, c chan []int, sem chan struct{}) {
+	defer func() {
+		<-sem
+	}()
+
 	simulations := make([]int, n)
 	for i := range simulations {
 		for _, v := range simulation(numberOfInteraction) {
@@ -91,7 +109,7 @@ func simulateRNG(n int, c chan []int) {
 func StringWithCharset(length int, charset string) string {
 	b := make([]byte, length)
 	for i := range b {
-		b[i] = charset[rand.Intn(len(charset))]
+		b[i] = charset[rand.Intn(charsetLen)]
 	}
 	return string(b)
 }
@@ -101,7 +119,5 @@ func String(length int) string {
 }
 
 func RandomNumber() int {
-	min := 10
-	max := 30
 	return rand.Intn(max-min+1) + min
 }
