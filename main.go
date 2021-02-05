@@ -18,23 +18,20 @@ func main() {
 	SimulateLootRNG()
 }
 
+var rx = regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
+
 func SimulateLootRNG() {
 	rand.Seed(time.Now().UnixNano())
 
 	nCPU := runtime.NumCPU()
 	rngTests := make([]chan []int, nCPU)
+	results := make([]int, numberOfSimulation)
 	for i := range rngTests {
 		c := make(chan []int)
-		//divide per CPU thread
-		go simulateRNG(numberOfSimulation/nCPU, c)
-		rngTests[i] = c
-	}
-
-	// Concatentate the test results
-	results := make([]int, numberOfSimulation)
-	for i, c := range rngTests {
 		start := (numberOfSimulation / nCPU) * i
 		stop := (numberOfSimulation / nCPU) * (i + 1)
+		//divide per CPU thread
+		go simulateRNG(numberOfSimulation/nCPU, c)
 		copy(results[start:stop], <-c)
 	}
 
@@ -47,21 +44,19 @@ func SimulateLootRNG() {
 	But if monster name doesn't contain any of character from `victory`, it will be treated as 0
 */
 func interaction() int {
-	rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
+
+	isItemDrop := rand.Float64() <= dropRate
+	if !isItemDrop {
+		return 0
+	}
 
 	monsterName := String(RandomNumber())
 	nameContainsVictory := rx.MatchString(monsterName)
-	isItemDrop := rand.Float64() <= dropRate
-
 	if !nameContainsVictory {
 		return 0
 	}
 
-	if isItemDrop {
-		return 1
-	}
-
-	return 0
+	return 1
 }
 
 /**
