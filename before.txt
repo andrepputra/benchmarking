@@ -1,0 +1,9 @@
+== go test -bench=. -benchtime=5s -benchmem
+goos: linux
+goarch: amd64
+pkg: github.com/ibnufirdaus/benchmarking
+BenchmarkSimulateLootRNG-8           361          17069835 ns/op        30245761 B/op     150535 allocs/op
+PASS
+ok      github.com/ibnufirdaus/benchmarking     7.852s
+
+== go test -bench=. -cpuprofile=cpu.out && go tool pprof --pdf benchmarking.test cpu.out > before.pdf
