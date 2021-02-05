@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"regexp"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -15,11 +16,11 @@ const (
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	SimulateLootRNG()
 }
 
 func SimulateLootRNG() {
-	rand.Seed(time.Now().UnixNano())
 
 	nCPU := runtime.NumCPU()
 	rngTests := make([]chan []int, nCPU)
@@ -70,7 +71,7 @@ func interaction() int {
 func simulation(n int) []int {
 	interactions := make([]int, n)
 	for i := range interactions {
-		interactions[i] = interaction()
+		interactions[i] = interactionV4()
 	}
 	return interactions
 }
@@ -104,4 +105,62 @@ func RandomNumber() int {
 	min := 10
 	max := 30
 	return rand.Intn(max-min+1) + min
+}
+
+func interactionV2() int {
+	isItemDrop := rand.Float64() <= dropRate
+	if isItemDrop {
+		return 1
+	}
+
+	monsterName := String(RandomNumber())
+	for _, r := range monsterName {
+		if validateChar(r) {
+			return 1
+		}
+	}
+
+	return 0
+}
+
+func validateChar(c rune) bool {
+	return c == 'v' || c == 'i' || c == 'c' || c == 't' || c == 'o' || c == 'r' || c == 'y' || c == 'V' || c == 'I' || c == 'C' || c == 'T' || c == 'O' || c == 'R' || c == 'Y'
+}
+
+var listRune = []rune{'v', 'i', 'c', 't', 'o', 'r', 'y', 'V', 'I', 'C', 'T', 'O', 'R', 'Y'}
+
+func interactionV3() int {
+	isItemDrop := rand.Float64() <= dropRate
+	if isItemDrop {
+		return 1
+	}
+
+	monsterName := String(RandomNumber())
+	for _, r := range listRune {
+		if strings.ContainsRune(monsterName, r) {
+			return 1
+		}
+	}
+
+	return 0
+}
+
+var mapRune = map[rune]bool{
+	'v': true, 'i': true, 'c': true, 't': true, 'o': true, 'r': true, 'y': true, 'V': true, 'I': true, 'C': true, 'T': true, 'O': true, 'R': true, 'Y': true,
+}
+
+func interactionV4() int {
+	isItemDrop := rand.Float64() <= dropRate
+	if isItemDrop {
+		return 1
+	}
+
+	monsterName := String(RandomNumber())
+	for _, r := range monsterName {
+		if mapRune[r] {
+			return 1
+		}
+	}
+
+	return 0
 }
