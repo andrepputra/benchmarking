@@ -2,8 +2,8 @@ package main
 
 import (
 	"math/rand"
-	"regexp"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -12,6 +12,7 @@ const (
 	numberOfInteraction = 100
 	dropRate            = 0.1
 	charset             = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	victoryString       = "victory"
 )
 
 func main() {
@@ -47,16 +48,13 @@ func SimulateLootRNG() {
 	But if monster name doesn't contain any of character from `victory`, it will be treated as 0
 */
 func interaction() int {
-	rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
-
-	monsterName := String(RandomNumber())
-	nameContainsVictory := rx.MatchString(monsterName)
-	isItemDrop := rand.Float64() <= dropRate
-
+	monsterName := strings.ToLower(String(RandomNumber()))
+	nameContainsVictory := strings.ContainsAny(monsterName, victoryString)
 	if !nameContainsVictory {
 		return 0
 	}
 
+	isItemDrop := rand.Float64() <= dropRate
 	if isItemDrop {
 		return 1
 	}
