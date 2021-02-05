@@ -20,13 +20,13 @@ func main() {
 
 func SimulateLootRNG() {
 	rand.Seed(time.Now().UnixNano())
-
+	rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
 	nCPU := runtime.NumCPU()
 	rngTests := make([]chan []int, nCPU)
 	for i := range rngTests {
 		c := make(chan []int)
 		//divide per CPU thread
-		go simulateRNG(numberOfSimulation/nCPU, c)
+		go newSimulateRNG(numberOfSimulation/nCPU, c, rx)
 		rngTests[i] = c
 	}
 
@@ -46,9 +46,7 @@ func SimulateLootRNG() {
 	Returns 1 if the monster dropped an item and 0 otherwise
 	But if monster name doesn't contain any of character from `victory`, it will be treated as 0
 */
-func interaction() int {
-	rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
-
+func interaction(rx *regexp.Regexp) int {
 	monsterName := String(RandomNumber())
 	nameContainsVictory := rx.MatchString(monsterName)
 	isItemDrop := rand.Float64() <= dropRate
@@ -67,23 +65,39 @@ func interaction() int {
 /**
  * Runs several interactions and retuns a slice representing the results
  */
-func simulation(n int) []int {
-	interactions := make([]int, n)
-	for i := range interactions {
-		interactions[i] = interaction()
+// func simulation(n int) []int {
+// 	interactions := make([]int, n)
+// 	for i := range interactions {
+// 		interactions[i] = interaction()
+// 	}
+// 	return interactions
+// }
+
+func newSimulation(n int, rx *regexp.Regexp) int {
+	sum := 0
+	for i := 0; i < n; i++ {
+		sum += interaction(rx)
 	}
-	return interactions
+	return sum
 }
 
 /**
  * Runs several simulations and returns the results
  */
-func simulateRNG(n int, c chan []int) {
+// func simulateRNG(n int, c chan []int) {
+// 	simulations := make([]int, n)
+// 	for i := range simulations {
+// 		for _, v := range simulation(numberOfInteraction) {
+// 			simulations[i] += v
+// 		}
+// 	}
+// 	c <- simulations
+// }
+
+func newSimulateRNG(n int, c chan []int, rx *regexp.Regexp) {
 	simulations := make([]int, n)
 	for i := range simulations {
-		for _, v := range simulation(numberOfInteraction) {
-			simulations[i] += v
-		}
+		simulations[i] = newSimulation(numberOfInteraction, rx)
 	}
 	c <- simulations
 }
