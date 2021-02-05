@@ -14,6 +14,10 @@ const (
 	charset             = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
+var (
+	rx = regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
+)
+
 func main() {
 	SimulateLootRNG()
 }
@@ -47,21 +51,19 @@ func SimulateLootRNG() {
 	But if monster name doesn't contain any of character from `victory`, it will be treated as 0
 */
 func interaction() int {
-	rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
 
-	monsterName := String(RandomNumber())
+	// monsterName := String(RandomNumber())
+	monsterName := RandStringBytesRmndr(10)
 	nameContainsVictory := rx.MatchString(monsterName)
-	isItemDrop := rand.Float64() <= dropRate
+	if !(rand.Float64() <= dropRate) {
+		return 0
+	}
 
 	if !nameContainsVictory {
 		return 0
 	}
 
-	if isItemDrop {
-		return 1
-	}
-
-	return 0
+	return 1
 }
 
 /**
@@ -104,4 +106,12 @@ func RandomNumber() int {
 	min := 10
 	max := 30
 	return rand.Intn(max-min+1) + min
+}
+
+func RandStringBytesRmndr(n int) string {
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = charset[rand.Int63()%int64(len(charset))]
+	}
+	return string(b)
 }
