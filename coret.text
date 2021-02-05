@@ -1,0 +1,5 @@
+Before:
+BenchmarkSimulateLootRNG-4           109          19571826 ns/op        29589111 B/op     150459 allocs/op
+
+After:
+BenchmarkSimulateLootRNG-4           109           3172909 ns/op          102071 B/op       3225 allocs/op
