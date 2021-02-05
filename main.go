@@ -4,6 +4,7 @@ import (
 	"math/rand"
 	"regexp"
 	"runtime"
+	"sync"
 	"time"
 )
 
@@ -22,6 +23,7 @@ func SimulateLootRNG() {
 	rand.Seed(time.Now().UnixNano())
 
 	nCPU := runtime.NumCPU()
+	// nCPU := 32
 	rngTests := make([]chan []int, nCPU)
 	for i := range rngTests {
 		c := make(chan []int)
@@ -46,8 +48,14 @@ func SimulateLootRNG() {
 	Returns 1 if the monster dropped an item and 0 otherwise
 	But if monster name doesn't contain any of character from `victory`, it will be treated as 0
 */
+
+var rx *regexp.Regexp
+var once sync.Once
+
 func interaction() int {
-	rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
+	once.Do(func() {
+		rx = regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
+	})
 
 	monsterName := String(RandomNumber())
 	nameContainsVictory := rx.MatchString(monsterName)
@@ -103,5 +111,7 @@ func String(length int) string {
 func RandomNumber() int {
 	min := 10
 	max := 30
+
+	// return int(time.Now().UnixNano()%20 + 10)
 	return rand.Intn(max-min+1) + min
 }
