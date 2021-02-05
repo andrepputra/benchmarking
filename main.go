@@ -2,8 +2,9 @@ package main
 
 import (
 	"math/rand"
-	"regexp"
+	//"regexp"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -12,6 +13,18 @@ const (
 	numberOfInteraction = 100
 	dropRate            = 0.1
 	charset             = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+)
+
+var (
+	mapVictory = map[string]bool{
+		"v": true,
+		"i": true,
+		"c": true,
+		"t": true,
+		"o": true,
+		"r": true,
+		"y": true,
+	}
 )
 
 func main() {
@@ -47,21 +60,19 @@ func SimulateLootRNG() {
 	But if monster name doesn't contain any of character from `victory`, it will be treated as 0
 */
 func interaction() int {
-	rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
+	//rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
 
-	monsterName := String(RandomNumber())
-	nameContainsVictory := rx.MatchString(monsterName)
 	isItemDrop := rand.Float64() <= dropRate
 
-	if !nameContainsVictory {
+	if !isItemDrop {
 		return 0
 	}
 
-	if isItemDrop {
-		return 1
+	if !StringContains(RandomNumber()) {
+		return 0
 	}
 
-	return 0
+	return 1
 }
 
 /**
@@ -98,6 +109,21 @@ func StringWithCharset(length int, charset string) string {
 
 func String(length int) string {
 	return StringWithCharset(length, charset)
+}
+
+func StringWithCharsetContains(length int, charset string) bool {
+	for i := 0; i < length; i++ {
+		chr := strings.ToLower(string(charset[rand.Intn(len(charset))]))
+		if mapVictory[chr] {
+			return true
+		}
+
+	}
+	return false
+}
+
+func StringContains(length int) bool {
+	return StringWithCharsetContains(length, charset)
 }
 
 func RandomNumber() int {
