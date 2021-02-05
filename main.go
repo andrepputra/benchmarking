@@ -22,7 +22,7 @@ func SimulateLootRNG() {
 	rand.Seed(time.Now().UnixNano())
 
 	nCPU := runtime.NumCPU()
-	rngTests := make([]chan []int, nCPU)
+	rngTests := make([]chan []int, 0, nCPU)
 	for i := range rngTests {
 		c := make(chan []int)
 		//divide per CPU thread
@@ -68,7 +68,7 @@ func interaction() int {
  * Runs several interactions and retuns a slice representing the results
  */
 func simulation(n int) []int {
-	interactions := make([]int, n)
+	interactions := make([]int, 0, n)
 	for i := range interactions {
 		interactions[i] = interaction()
 	}
@@ -79,7 +79,7 @@ func simulation(n int) []int {
  * Runs several simulations and returns the results
  */
 func simulateRNG(n int, c chan []int) {
-	simulations := make([]int, n)
+	simulations := make([]int, 0, n)
 	for i := range simulations {
 		for _, v := range simulation(numberOfInteraction) {
 			simulations[i] += v
@@ -89,7 +89,7 @@ func simulateRNG(n int, c chan []int) {
 }
 
 func StringWithCharset(length int, charset string) string {
-	b := make([]byte, length)
+	b := make([]byte, 0, length)
 	for i := range b {
 		b[i] = charset[rand.Intn(len(charset))]
 	}
