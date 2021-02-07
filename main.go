@@ -14,6 +14,12 @@ const (
 	charset             = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 )
 
+var (
+	rx  = regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
+	min = 10
+	max = 30
+)
+
 func main() {
 	SimulateLootRNG()
 }
@@ -47,7 +53,6 @@ func SimulateLootRNG() {
 	But if monster name doesn't contain any of character from `victory`, it will be treated as 0
 */
 func interaction() int {
-	rx := regexp.MustCompile(`(?i)(.*)v(.*)|(.*)i(.*)|(.*)c(.*)|(.*)t(.*)|(.*)o(.*)|(.*)r(.*)|(.*)y(.*)`)
 
 	monsterName := String(RandomNumber())
 	nameContainsVictory := rx.MatchString(monsterName)
@@ -101,7 +106,5 @@ func String(length int) string {
 }
 
 func RandomNumber() int {
-	min := 10
-	max := 30
 	return rand.Intn(max-min+1) + min
 }
