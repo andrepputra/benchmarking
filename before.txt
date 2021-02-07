@@ -1,0 +1,7 @@
+marvin.santoso@BA-00013625:~/go/src/github.com/santosomarvin/benchmarking$ go test -bench=. -benchtime=500x -benchmem
+goos: linux
+goarch: amd64
+pkg: github.com/santosomarvin/benchmarking
+BenchmarkSimulateLootRNG-8           500          10121086 ns/op        30191035 B/op     150534 allocs/op
+PASS
+ok      github.com/santosomarvin/benchmarking   5.078s
